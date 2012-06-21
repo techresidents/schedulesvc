@@ -4,18 +4,16 @@ import logging
 import logging.config
 import signal
 import sys
-import gevent
 
 import settings
 
 from trpycore.process.pid import pidfile, PidFileException
-from trsvcscore.service_gevent.base import GService
+from trsvcscore.service.base import Service
 from trschedulesvc.gen import TScheduleService
 
 from handler import ScheduleServiceHandler
 
-
-class ScheduleService(GService):
+class ScheduleService(Service):
     def __init__(self):
 
         handler = ScheduleServiceHandler()
@@ -25,25 +23,37 @@ class ScheduleService(GService):
                 interface=settings.SERVER_INTERFACE,
                 port=settings.SERVER_PORT,
                 handler=handler,
-                processor=TScheduleService.Processor(handler))
+                processor=TScheduleService.Processor(handler),
+                threads=1)
  
 def main(argv):
     try:
+        #Configure logger
+        logging.config.dictConfig(settings.LOGGING)
+
         with pidfile(settings.SERVICE_PID_FILE, create_directory=True):
 
-            #Configure logger
-            logging.config.dictConfig(settings.LOGGING)
             
             #Create service
             service = ScheduleService()
             
-            def sigterm_handler():
+            #Register signal handlers
+            def sigterm_handler(signum, stack_frame):
                 service.stop()
 
-            gevent.signal(signal.SIGTERM, sigterm_handler);
-
+            signal.signal(signal.SIGTERM, sigterm_handler);
+            
+            #Start service
             service.start()
-            service.join()
+            
+            #Join service
+            while True:
+                #join needs to be invoked with a timeout
+                #otherwise we will not receive SIGTERM
+                #interrupt or the KeyboardInterrupt.
+                service.join(settings.SERVICE_JOIN_TIMEOUT)
+                if not service.is_alive():
+                    break
     
     except PidFileException as error:
         logging.error("Service is already running: %s" % str(error))

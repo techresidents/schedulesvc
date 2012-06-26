@@ -1,3 +1,4 @@
+import datetime
 import logging
 import threading
 import time
@@ -192,7 +193,7 @@ class ChatSchedulerThreadPool(ThreadPool):
                         chat_user = ChatUser(
                                 chat_session=chat_session,
                                 user_id=registration.user_id,
-                                participant=registration_index)
+                                participant=registration_index+1)
                         session.add(chat_user)
             session.commit()
             self.log.info("Created chat sessions and users for chat_id=%d" % chat_id)
@@ -252,6 +253,7 @@ class ChatScheduler(object):
                 for chat in session.query(Chat).\
                         outerjoin(ChatScheduleJob).\
                         filter(Chat.checkin_end < func.current_timestamp()).\
+                        filter(Chat.checkin_end + datetime.timedelta(hours=1) > func.current_timestamp()).\
                         filter(ChatScheduleJob.id == None): 
                     
                     #delegate chats to threadpool for processing

@@ -1,11 +1,45 @@
-#!/usr/bin/env python
+import socket
 
 from default_settings import *
 
-ENV="localdev"
+ENV = "localdev"
 
-#Service settings
+#Server settings
+SERVER_HOST = socket.gethostname()
+SERVER_INTERFACE = "0.0.0.0"
+SERVER_PORT = 9092
+
+#Service Settings
 SERVICE_PID_FILE = "/opt/30and30/data/%s/pid/%s.%s.pid" % (SERVICE, SERVICE, ENV)
+SERVICE_JOIN_TIMEOUT = 1
+
+#Database settings
+DATABASE_HOST = "localhost"
+DATABASE_NAME = "localdev_techresidents"
+DATABASE_USERNAME = "techresidents"
+DATABASE_PASSWORD = "techresidents"
+DATABASE_CONNECTION = "postgresql+psycopg2://%s:%s@/%s?host=%s" % (DATABASE_USERNAME, DATABASE_PASSWORD, DATABASE_NAME, DATABASE_HOST)
+
+#Zookeeper settings
+ZOOKEEPER_HOSTS = ["localhost:2181"]
+
+#Riak settings
+RIAK_HOST = "localhost"
+RIAK_PORT = 8087
+RIAK_SESSION_BUCKET = "tr_sessions"
+RIAK_SESSION_POOL_SIZE = 4
+
+#Tokbox settings
+TOKBOX_API_KEY = '15889991'
+TOKBOX_API_SECRET = '19a6fb225790a2cf3e048c58ef2fdcc425e7b599'
+TOKBOX_IS_STAGING = True
+
+#Scheduler settings
+SCHEDULER_THREADS = 4
+SCHEDULER_POLL_SECONDS = 60
+SCHEDULER_MIN_GROUP_SIZE = 2
+SCHEDULER_MAX_GROUP_SIZE = 3
+
 
 #Logging settings
 LOGGING = {

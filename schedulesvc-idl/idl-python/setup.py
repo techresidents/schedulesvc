@@ -4,7 +4,7 @@ from distutils.core import setup
 
 setup(name='trschedulesvc',
       version='${project.version}',
-      description='30and30 Service',
+      description='Tech Residents Service',
       packages=['trschedulesvc',
                 'trschedulesvc.gen']
     )

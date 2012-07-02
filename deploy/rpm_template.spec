@@ -5,7 +5,7 @@
 
 #Non-template defines
 %define app_buildroot $RPM_BUILD_ROOT/%{__prefix}/%{name}-%{version}/%{name}
-%define __prefix /opt/tr/services/lookupsvc/install
+%define __prefix /opt/tr/services/schedulesvc/install
 %define app_installroot %{__prefix}/%{name}-%{version}/%{name}
 
 Summary: Tech Residents Service 

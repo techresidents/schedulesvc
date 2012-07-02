@@ -6,21 +6,21 @@
     <parent>
         <groupId>com.techresidents.services.core.java</groupId>
         <artifactId>services-pom</artifactId>
-        <version>0.3.0</version>
+        <version>0.4.0</version>
     </parent>
 
     <groupId>com.techresidents.services.schedulesvc</groupId>
     <artifactId>schedulesvc-idl</artifactId>
-    <version>0.1.0</version>
+    <version>0.2.0</version>
     <packaging>pom</packaging>
 
     <name>schedulesvc idl</name>
     <inceptionYear>2012</inceptionYear>
 
     <scm>
-        <connection>scm:git:git://dev.30and30.com/30and30/repos/techresidents/services/schedulesvc.git</connection>
-        <developerConnection>scm:git:git://dev.30and30.com/30and30/repos/techresidents/services/schedulesvc.git</developerConnection>
-        <url>scm:git:git://dev.30and30.com/30and30/repos/techresidents/services/schedulesvc.git</url>
+        <connection>scm:git:git://dev.techresidents.com/tr/repos/techresidents/services/schedulesvc.git</connection>
+        <developerConnection>scm:git:git://dev.techresidents.com/tr/repos/techresidents/services/schedulesvc.git</developerConnection>
+        <url>scm:git:git://dev.techresidents.com/tr/repos/techresidents/services/schedulesvc.git</url>
     </scm>
 
     <profiles>

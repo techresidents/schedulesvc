@@ -11,7 +11,7 @@
 
     <groupId>com.techresidents.services.schedulesvc</groupId>
     <artifactId>schedulesvc-idl</artifactId>
-    <version>0.3-SNAPSHOT</version>
+    <version>0.4-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>schedulesvc idl</name>

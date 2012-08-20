@@ -11,7 +11,7 @@ from sqlalchemy.sql import func
 from trpycore.alg.grouping import group
 from trpycore.thread.util import join
 from trpycore.thread.threadpool import ThreadPool
-from trsvcscore.models import Chat, ChatRegistration, ChatScheduleJob, ChatSession, ChatUser
+from trsvcscore.db.models import Chat, ChatRegistration, ChatScheduleJob, ChatSession, ChatUser
 
 import settings
 
@@ -103,7 +103,9 @@ class ChatSchedulerThreadPool(ThreadPool):
         self.log.info("Attempting to create chat schedule job for chat_id=%d ..." % chat_id)
         result = False
         try:
+            close = session is None
             session = session or self.create_db_session()
+
             job = ChatScheduleJob(chat_id=chat_id, start=func.current_timestamp())
             session.add(job)
             session.commit()
@@ -116,6 +118,9 @@ class ChatSchedulerThreadPool(ThreadPool):
             session.rollback()
             self.log.error("Unable to create chat schedule job for chat_id=%d, %s" % (chat_id, str(error)))
             raise
+        finally:
+            if close and session:
+                session.close()
 
         return result
 
@@ -126,10 +131,16 @@ class ChatSchedulerThreadPool(ThreadPool):
         field with the current timestamp.
         """
         self.log.info("Ending chat schedule job for chat_id=%d ..." % chat_id)
-        session = session or self.create_db_session()
-        job = session.query(ChatScheduleJob).filter(ChatScheduleJob.chat_id==chat_id).first()
-        job.end = func.current_timestamp()
-        session.commit()
+        try:
+            close = session is None
+            session = session or self.create_db_session()
+
+            job = session.query(ChatScheduleJob).filter(ChatScheduleJob.chat_id==chat_id).first()
+            job.end = func.current_timestamp()
+            session.commit()
+        finally:
+            if close and session:
+                session.close()
 
     def _abort_chat_schedule_job(self, chat_id, session=None):
         """Abort ChatScheduleJob.
@@ -137,9 +148,15 @@ class ChatSchedulerThreadPool(ThreadPool):
         Abort the current schedule job, by deleting the job record.
         """
         self.log.error("Aborting chat schedule job for chat_id=%d ..." % chat_id)
-        session = session or self.create_db_session()
-        session.query(ChatScheduleJob).filter(ChatScheduleJob.chat_id==chat_id).delete()
-        session.commit()
+
+        try:
+            close = session is None
+            session = session or self.create_db_session()
+            session.query(ChatScheduleJob).filter(ChatScheduleJob.chat_id==chat_id).delete()
+            session.commit()
+        finally:
+            if close and session:
+                session.close()
 
     def _create_chat_sessions(self, chat_id, session=None):
         """Create chat sessions and associated entities.
@@ -153,7 +170,9 @@ class ChatSchedulerThreadPool(ThreadPool):
         """
         self.log.info("Creating chat session for chat_id=%d" % chat_id)
         try:
+            close = session is None
             session = session or self.create_db_session()
+
             registrations = session.query(ChatRegistration).\
                     filter(ChatRegistration.chat_id == chat_id).\
                     filter(ChatRegistration.chat_session_id == None).\
@@ -200,6 +219,9 @@ class ChatSchedulerThreadPool(ThreadPool):
         except Exception:
             session.rollback()
             raise
+        finally:
+            if close and session:
+                session.close()
 
 class ChatScheduler(object):
     """Chat scheduler creates and delegates work items to the ChatSchedulerThreadPool.
@@ -279,6 +301,8 @@ class ChatScheduler(object):
                 while self.running and (time.time() < end):
                     remaining_wait = end - time.time()
                     self.exit.wait(remaining_wait)
+
+        session.close()           
 
     def stop(self):
         """Stop scheduler."""

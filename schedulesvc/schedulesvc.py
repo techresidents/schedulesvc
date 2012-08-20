@@ -2,29 +2,45 @@
 
 import logging
 import logging.config
+import os
 import signal
 import sys
 
-import settings
+#Add PROJECT_ROOT to syspath for version import
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
+sys.path.insert(0, PROJECT_ROOT)
 
+import settings
+import version
+
+from tridlcore.gen.ttypes import Status
 from trpycore.process.pid import pidfile, PidFileException
-from trsvcscore.service.base import Service
+from trsvcscore.service.default import DefaultService
+from trsvcscore.service.server.default import ThriftServer
 from trschedulesvc.gen import TScheduleService
 
 from handler import ScheduleServiceHandler
 
-class ScheduleService(Service):
+class ScheduleService(DefaultService):
     def __init__(self):
 
-        handler = ScheduleServiceHandler()
+        handler = ScheduleServiceHandler(self)
+        server = ThriftServer(
+                name=settings.SERVICE,
+                interface=settings.THRIFT_SERVER_INTERFACE,
+                port=settings.THRIFT_SERVER_PORT,
+                handler=handler,
+                processor=TScheduleService.Processor(handler),
+                threads=1,
+                address=settings.THRIFT_SERVER_ADDRESS)
 
         super(ScheduleService, self).__init__(
                 name=settings.SERVICE,
-                interface=settings.SERVER_INTERFACE,
-                port=settings.SERVER_PORT,
-                handler=handler,
-                processor=TScheduleService.Processor(handler),
-                threads=1)
+                version=version.VERSION,
+                build=version.BUILD,
+                servers=[server],
+                hostname=settings.SERVICE_HOSTNAME,
+                fqdn=settings.SERVICE_FQDN)
  
 def main(argv):
     try:
@@ -52,7 +68,9 @@ def main(argv):
                 #otherwise we will not receive SIGTERM
                 #interrupt or the KeyboardInterrupt.
                 service.join(settings.SERVICE_JOIN_TIMEOUT)
-                if not service.is_alive():
+                status = service.status()
+                if status == Status.STOPPED or \
+                        status == Status.DEAD:
                     break
     
     except PidFileException as error:

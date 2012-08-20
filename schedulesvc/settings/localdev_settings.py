@@ -4,14 +4,17 @@ from default_settings import *
 
 ENV = "localdev"
 
-#Server settings
-SERVER_HOST = socket.gethostname()
-SERVER_INTERFACE = "0.0.0.0"
-SERVER_PORT = 9092
-
 #Service Settings
+SERVICE = "schedulesvc"
 SERVICE_PID_FILE = "/opt/tr/data/%s/pid/%s.%s.pid" % (SERVICE, SERVICE, ENV)
+SERVICE_HOSTNAME = socket.gethostname()
+SERVICE_FQDN = socket.gethostname()
 SERVICE_JOIN_TIMEOUT = 1
+
+#Thrift Server settings
+THRIFT_SERVER_ADDRESS = socket.gethostname()
+THRIFT_SERVER_INTERFACE = "0.0.0.0"
+THRIFT_SERVER_PORT = 9092
 
 #Database settings
 DATABASE_HOST = "localhost"

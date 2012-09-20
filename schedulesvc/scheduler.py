@@ -74,8 +74,7 @@ class ChatSchedulerThreadPool(ThreadPool):
         #Create the tokbox session
         opentok = OpenTokSDK.OpenTokSDK(
                 settings.TOKBOX_API_KEY,
-                settings.TOKBOX_API_SECRET, 
-                settings.TOKBOX_IS_STAGING) 
+                settings.TOKBOX_API_SECRET)
         
         #IP passed to tokbox when session is created will be used to determine
         #tokbox server location for chat session. Note that tokboxchat sessions
